@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive, premium moving checklist for transitioning from Kanata (239 Tandalee Crescent) to Stittsville. Includes Cash for Keys contract tracker, utility setups, and local Ottawa checklists.">
+  <title>Kanata to Stittsville Moving Tracker & Handover Checklist</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Background Accents -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-main">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <i data-lucide="truck"></i>
+          </div>
+          <div>
+            <h1 class="app-title">Kanata to Stittsville</h1>
+            <p class="app-subtitle">Interactive Moving & Handover Tracker</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="current-date-badge" id="current-date">
+            <i data-lucide="calendar"></i>
+            <span id="date-text">Loading date...</span>
+          </div>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode">
+            <i data-lucide="sun" id="sun-icon"></i>
+            <i data-lucide="moon" id="moon-icon" style="display: none;"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Progress Bar Card -->
+      <div class="stats-card">
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Total Progress</span>
+            <span class="stat-value" id="progress-percentage">0%</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Completed Tasks</span>
+            <span class="stat-value" id="progress-count">0 / 0</span>
+          </div>
+          <div class="stat-box" id="countdown-box">
+            <span class="stat-label">Days to Handover</span>
+            <span class="stat-value countdown-urgent" id="countdown-days">--</span>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- Sidebar / Cash for Keys Dashboard -->
+      <section class="handover-dashboard-section" aria-labelledby="handover-title">
+        <div class="glass-card handover-card">
+          <div class="handover-header">
+            <div class="handover-icon-wrapper">
+              <i data-lucide="key-round"></i>
+            </div>
+            <div>
+              <h2 id="handover-title" class="section-title">Cash for Keys Handover</h2>
+              <p class="section-subtitle">239 Tandalee Crescent Agreement</p>
+            </div>
+          </div>
+
+          <!-- Handover Info Grid -->
+          <div class="handover-info-grid">
+            <div class="info-item">
+              <span class="info-label">Move-Out Deadline</span>
+              <span class="info-value text-alert">June 15, 2026 @ 6:00 PM</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Stittsville Possession</span>
+              <span class="info-value">June 1, 2026</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Landlords</span>
+              <span class="info-value">Anastasya & Gennady Peymer</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">June Rent Paid</span>
+              <span class="info-value">$2,600.00</span>
+            </div>
+          </div>
+
+          <!-- Payment Breakdown Checklist -->
+          <div class="dashboard-block">
+            <h3 class="block-title">
+              <i data-lucide="dollar-sign"></i>
+              Handovers Payments ($8,900.00 Total)
+            </h3>
+            <ul class="handover-checklist">
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="pay-incentive" class="deal-check">
+                  <span class="custom-check"></span>
+                  <div class="check-label-group">
+                    <span class="deal-title">Move-out incentive</span>
+                    <span class="deal-amount">$5,000.00</span>
+                  </div>
+                </label>
+              </li>
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="pay-deposit" class="deal-check">
+                  <span class="custom-check"></span>
+                  <div class="check-label-group">
+                    <span class="deal-title">Last Month Deposit refund</span>
+                    <span class="deal-amount">$2,600.00</span>
+                  </div>
+                </label>
+              </li>
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="pay-refund" class="deal-check">
+                  <span class="custom-check"></span>
+                  <div class="check-label-group">
+                    <span class="deal-title">June 16-30 Refund (15 Days)</span>
+                    <span class="deal-amount">$1,300.00</span>
+                  </div>
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Return Items Checklist -->
+          <div class="dashboard-block">
+            <h3 class="block-title">
+              <i data-lucide="package-check"></i>
+              Key Handover Returns
+            </h3>
+            <ul class="handover-checklist">
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="return-keys" class="deal-check">
+                  <span class="custom-check"></span>
+                  <span class="deal-text">Front, Back & Mailbox Keys</span>
+                </label>
+              </li>
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="return-openers" class="deal-check">
+                  <span class="custom-check"></span>
+                  <span class="deal-text">Garage Door Openers / Remotes</span>
+                </label>
+              </li>
+              <li>
+                <label class="handover-check-item">
+                  <input type="checkbox" id="return-fobs" class="deal-check">
+                  <span class="custom-check"></span>
+                  <span class="deal-text">Access Fobs, Remotes & Codes</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Handover Status Stamp -->
+          <div class="handover-stamp-container">
+            <div id="handover-deal-stamp" class="deal-stamp pending">
+              PENDING HANDOVER
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Checklist Section -->
+      <section class="checklist-section" aria-labelledby="checklist-title">
+        <h2 id="checklist-title" class="sr-only">Detailed Moving Checklist</h2>
+        
+        <!-- Controls & Filters Bar -->
+        <div class="controls-card glass-card">
+          <!-- Live Search -->
+          <div class="search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="task-search" placeholder="Search tasks, utilities, ServiceOntario, etc..." aria-label="Search tasks">
+            <button id="clear-search" class="clear-search-btn" style="display: none;">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <!-- Timeframe Filters -->
+          <div class="filter-group">
+            <span class="filter-group-label">Timeline:</span>
+            <div class="filter-buttons scroll-container" id="timeframe-filters">
+              <button class="filter-btn active" data-timeframe="all">All Phases</button>
+              <button class="filter-btn" data-timeframe="pre-move">Pre-Move (Now - May 31)</button>
+              <button class="filter-btn" data-timeframe="overlap">Overlap (June 1 - 14)</button>
+              <button class="filter-btn" data-timeframe="handover">Handover Day (June 15)</button>
+              <button class="filter-btn" data-timeframe="post-move">Post-Move (Stittsville)</button>
+            </div>
+          </div>
+
+          <!-- Status & Special Tag Filters -->
+          <div class="sub-filter-row">
+            <div class="sub-filter-group">
+              <span class="filter-group-label">Status:</span>
+              <select id="status-filter" class="custom-select" aria-label="Filter by Status">
+                <option value="all">All Tasks</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div class="sub-filter-group">
+              <span class="filter-group-label">Highlight:</span>
+              <select id="tag-filter" class="custom-select" aria-label="Filter by Highlight">
+                <option value="all">No Highlight Filter</option>
+                <option value="important">⭐ Urgent/Important Only</option>
+                <option value="ottawa">🇨🇦 Ottawa Specific Only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task List Container -->
+        <div class="tasks-container" id="tasks-list">
+          <!-- Dynamic Task Items Go Here -->
+        </div>
+
+        <!-- Add Custom Task Form -->
+        <div class="glass-card add-task-card">
+          <h3 class="add-task-title">
+            <i data-lucide="plus-circle"></i> Add Custom Task
+          </h3>
+          <form id="add-task-form" class="add-task-form">
+            <div class="form-grid">
+              <div class="form-group span-2">
+                <label for="new-task-title">Task Title</label>
+                <input type="text" id="new-task-title" required placeholder="e.g., Return router to Bell store on Hazeldean">
+              </div>
+              <div class="form-group span-2">
+                <label for="new-task-desc">Details / Description</label>
+                <input type="text" id="new-task-desc" placeholder="e.g., Serial number: 12345, drop off at Kanata Centrum location">
+              </div>
+              <div class="form-group">
+                <label for="new-task-timeframe">Timeline Phase</label>
+                <select id="new-task-timeframe" class="custom-select">
+                  <option value="pre-move">Pre-Move (Now - May 31)</option>
+                  <option value="overlap">Overlap (June 1 - 14)</option>
+                  <option value="handover">Handover Day (June 15)</option>
+                  <option value="post-move">Post-Move (Stittsville)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="new-task-category">Category</label>
+                <select id="new-task-category" class="custom-select">
+                  <option value="logistics">Logistics</option>
+                  <option value="utilities">Utilities & Tech</option>
+                  <option value="admin">Admin & Address Change</option>
+                  <option value="packing">Packing</option>
+                  <option value="cleaning">Cleaning</option>
+                  <option value="finance">Finance</option>
+                </select>
+              </div>
+              <div class="checkbox-row span-2">
+                <label class="custom-checkbox-container">
+                  <input type="checkbox" id="new-task-important">
+                  <span class="custom-checkbox"></span>
+                  Mark as Urgent / Important
+                </label>
+                <label class="custom-checkbox-container">
+                  <input type="checkbox" id="new-task-ottawa">
+                  <span class="custom-checkbox"></span>
+                  Ottawa-Specific Task
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="submit-task-btn">
+              <i data-lucide="plus"></i> Add to Checklist
+            </button>
+          </form>
+        </div>
+
+        <!-- Backup, Import, and Reset Controls -->
+        <div class="data-controls-panel glass-card">
+          <div class="panel-header">
+            <h4><i data-lucide="database"></i> Manage Checklist Data</h4>
+            <p>Save backups of your moving progress or reset the checklist to default.</p>
+          </div>
+          <div class="data-btn-row">
+            <button id="export-btn" class="secondary-btn">
+              <i data-lucide="download"></i> Export Progress (JSON)
+            </button>
+            <label class="secondary-btn file-input-label">
+              <i data-lucide="upload"></i> Import Progress
+              <input type="file" id="import-file" accept=".json" style="display: none;">
+            </label>
+            <button id="reset-btn" class="danger-btn">
+              <i data-lucide="refresh-cw"></i> Reset to Default
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer-note">
+      <p>Moving from Kanata (239 Tandalee Crescent) to Stittsville | Generated with care for Udit & Sarah</p>
+      <p class="tech-stack-info">Runs entirely local using localStorage. Easy to host on GitHub Pages.</p>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="checklistData.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
