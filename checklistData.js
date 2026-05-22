@@ -175,6 +175,33 @@ const defaultChecklist = [
     isOttawaSpecific: false
   },
   {
+    id: "overlap-remove-ring",
+    title: "Remove Ring Camera & Reinstall Doorbell",
+    description: "Uninstall the Ring video doorbell from the front door and replace it with the original standard doorbell before handover.",
+    category: "utilities",
+    timeframe: "overlap",
+    isImportant: true,
+    isOttawaSpecific: false
+  },
+  {
+    id: "overlap-nest-cover",
+    title: "Reinstall Nest Thermostat Cover",
+    description: "Ensure the original wall plate cover for the Nest thermostat is put back on the wall properly.",
+    category: "utilities",
+    timeframe: "overlap",
+    isImportant: false,
+    isOttawaSpecific: false
+  },
+  {
+    id: "overlap-bedroom-light",
+    title: "Revert Bedroom Automatic Light Switch",
+    description: "Remove the smart/automatic light switch in the bedroom and reinstall the original standard light switch.",
+    category: "utilities",
+    timeframe: "overlap",
+    isImportant: true,
+    isOttawaSpecific: false
+  },
+  {
     id: "overlap-gradual-moving",
     title: "Gradually Move Boxes & Fragiles",
     description: "Utilize the 2-week overlap window. Pack and drive carloads of boxes, plants, delicate items, and clothes from Kanata to Stittsville. This reduces moving day stress.",
