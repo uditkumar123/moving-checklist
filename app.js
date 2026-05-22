@@ -598,12 +598,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       if (!binId) {
+        let syncEmail = localStorage.getItem("kanata_stittsville_sync_email");
+        if (!syncEmail) {
+          const rand = Math.random().toString(36).substring(2, 10);
+          syncEmail = `kanata-stittsville-sync-${rand}@gmail.com`;
+          localStorage.setItem("kanata_stittsville_sync_email", syncEmail);
+        }
         const response = await fetch("https://kvdb.io/", {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
-          body: "email=kanata-stittsville-sync%40example.com"
+          body: `email=${encodeURIComponent(syncEmail)}`
         });
 
         if (!response.ok) {
