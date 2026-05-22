@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://kvdb.io/${binId}/checklist`);
+      const response = await fetch(`https://jsonblob.com/api/jsonBlob/${binId}`);
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -597,60 +597,62 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
+      const payload = JSON.stringify({ tasks, handoverDeal });
+
       if (!binId) {
-        let syncEmail = localStorage.getItem("kanata_stittsville_sync_email");
-        if (!syncEmail) {
-          const rand = Math.random().toString(36).substring(2, 10);
-          syncEmail = `kanata-stittsville-sync-${rand}@gmail.com`;
-          localStorage.setItem("kanata_stittsville_sync_email", syncEmail);
-        }
-        const response = await fetch("https://kvdb.io/", {
+        const response = await fetch("https://jsonblob.com/api/jsonBlob", {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/json",
+            "Accept": "application/json"
           },
-          body: `email=${encodeURIComponent(syncEmail)}`
+          body: payload
         });
 
         if (!response.ok) {
           throw new Error("Failed to create cloud sync bucket: " + response.status);
         }
 
-        const rawId = await response.text();
-        binId = rawId.trim();
+        const locationHeader = response.headers.get("Location");
+        if (locationHeader) {
+           const parts = locationHeader.split("/");
+           binId = parts[parts.length - 1];
+        } else {
+           throw new Error("No Location header returned from jsonblob");
+        }
         
         localStorage.setItem("kanata_stittsville_sync_code", binId);
         if (syncCodeInput) {
           syncCodeInput.value = binId;
         }
         updateUrlQueryParam(binId);
-      }
+      } else {
+        const putResponse = await fetch(`https://jsonblob.com/api/jsonBlob/${binId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: payload
+        });
 
-      const payload = JSON.stringify({ tasks, handoverDeal });
-      const putResponse = await fetch(`https://kvdb.io/${binId}/checklist`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: payload
-      });
-
-      if (!putResponse.ok) {
-        if (putResponse.status === 404 || putResponse.status === 403 || putResponse.status === 401) {
-          console.warn(`Sync failed (${putResponse.status}). Creating a new bin as fallback.`);
-          const retryConfirm = confirm(
-            "We couldn't update this cloud bin (it may have expired or is invalid).\n\n" +
-            "Would you like to create a new cloud checklist bin instead?"
-          );
-          if (retryConfirm) {
-            localStorage.removeItem("kanata_stittsville_sync_code");
-            if (syncCodeInput) syncCodeInput.value = "";
-            return await pushToCloud();
-          } else {
-            throw new Error(`Unauthorized or expired: ${putResponse.status}`);
+        if (!putResponse.ok) {
+          if (putResponse.status === 404 || putResponse.status === 403 || putResponse.status === 401) {
+            console.warn(`Sync failed (${putResponse.status}). Creating a new bin as fallback.`);
+            const retryConfirm = confirm(
+              "We couldn't update this cloud bin (it may have expired or is invalid).\n\n" +
+              "Would you like to create a new cloud checklist bin instead?"
+            );
+            if (retryConfirm) {
+              localStorage.removeItem("kanata_stittsville_sync_code");
+              if (syncCodeInput) syncCodeInput.value = "";
+              return await pushToCloud();
+            } else {
+              throw new Error(`Unauthorized or expired: ${putResponse.status}`);
+            }
           }
+          throw new Error("Failed response: " + putResponse.status);
         }
-        throw new Error("Failed response: " + putResponse.status);
       }
 
       updateSyncStatus("Cloud sync complete!", "success");
