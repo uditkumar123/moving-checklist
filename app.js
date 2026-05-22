@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://jsonhosting.com/api/json/${binId}`);
+      const response = await fetch(`https://kvdb.io/${binId}/checklist`);
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -558,8 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Failed response code: " + response.status);
       }
 
-      const responseData = await response.json();
-      const cloudData = responseData;
+      const text = await response.text();
+      const cloudData = JSON.parse(text);
 
       if (cloudData && cloudData.tasks && Array.isArray(cloudData.tasks)) {
         tasks = cloudData.tasks;
@@ -591,75 +591,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pushToCloud = async () => {
     let binId = syncCodeInput ? syncCodeInput.value.trim() : "";
-    let editKey = localStorage.getItem("kanata_stittsville_edit_key") || "";
     
     updateSyncStatus("Pushing to cloud...");
     if (cloudPushBtn) cloudPushBtn.disabled = true;
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      let url = "https://jsonhosting.com/api/json";
-      let method = "POST";
-      let headers = {
-        "Content-Type": "application/json"
-      };
+      if (!binId) {
+        const response = await fetch("https://kvdb.io/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: "email=kanata-stittsville-sync%40example.com"
+        });
 
-      if (binId && editKey) {
-        url = `https://jsonhosting.com/api/json/${binId}`;
-        method = "PATCH";
-        headers["X-Edit-Key"] = editKey;
-      } else if (binId && !editKey) {
-        const confirmNewBin = confirm(
-          "You are viewing a shared checklist but do not have permission to edit it directly.\n\n" +
-          "Would you like to create your own editable copy of this checklist?"
-        );
-        if (!confirmNewBin) {
-          updateSyncStatus("Push cancelled (read-only).");
-          return false;
+        if (!response.ok) {
+          throw new Error("Failed to create cloud sync bucket: " + response.status);
         }
-        binId = "";
-      }
 
-      const response = await fetch(url, {
-        method: method,
-        headers: headers,
-        body: JSON.stringify({ tasks, handoverDeal })
-      });
-
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403 || response.status === 404) {
-          console.warn(`Sync failed (${response.status}). Creating a new bin as fallback.`);
-          const retryConfirm = confirm(
-            "We couldn't update this cloud bin (it may have expired or is owned by another device).\n\n" +
-            "Would you like to create a new cloud checklist bin instead?"
-          );
-          if (retryConfirm) {
-            localStorage.removeItem("kanata_stittsville_sync_code");
-            localStorage.removeItem("kanata_stittsville_edit_key");
-            if (syncCodeInput) syncCodeInput.value = "";
-            return await pushToCloud();
-          } else {
-            throw new Error(`Unauthorized or expired: ${response.status}`);
-          }
-        }
-        throw new Error("Failed response: " + response.status);
-      }
-
-      const responseData = await response.json();
-      
-      if (method === "POST" && responseData && responseData.id) {
-        binId = responseData.id;
-        editKey = responseData.editKey || "";
+        const rawId = await response.text();
+        binId = rawId.trim();
+        
         localStorage.setItem("kanata_stittsville_sync_code", binId);
-        localStorage.setItem("kanata_stittsville_edit_key", editKey);
         if (syncCodeInput) {
           syncCodeInput.value = binId;
         }
         updateUrlQueryParam(binId);
-        updateSyncStatus("Created cloud bin!", "success");
+      }
+
+      const payload = JSON.stringify({ tasks, handoverDeal });
+      const putResponse = await fetch(`https://kvdb.io/${binId}/checklist`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: payload
+      });
+
+      if (!putResponse.ok) {
+        if (putResponse.status === 404 || putResponse.status === 403 || putResponse.status === 401) {
+          console.warn(`Sync failed (${putResponse.status}). Creating a new bin as fallback.`);
+          const retryConfirm = confirm(
+            "We couldn't update this cloud bin (it may have expired or is invalid).\n\n" +
+            "Would you like to create a new cloud checklist bin instead?"
+          );
+          if (retryConfirm) {
+            localStorage.removeItem("kanata_stittsville_sync_code");
+            if (syncCodeInput) syncCodeInput.value = "";
+            return await pushToCloud();
+          } else {
+            throw new Error(`Unauthorized or expired: ${putResponse.status}`);
+          }
+        }
+        throw new Error("Failed response: " + putResponse.status);
+      }
+
+      updateSyncStatus("Cloud sync complete!", "success");
+      
+      const savedSyncCode = localStorage.getItem("kanata_stittsville_sync_code");
+      if (savedSyncCode !== binId) {
         alert(`New cloud sync checklist created!\nYour Bin ID is: ${binId}\nShareable link added to address bar.`);
-      } else {
-        updateSyncStatus("Cloud sync complete!", "success");
       }
       return true;
     } catch (err) {
@@ -693,7 +685,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const success = await pullFromCloud(cleanUrlBinId, false);
           if (success) {
             localStorage.setItem("kanata_stittsville_sync_code", cleanUrlBinId);
-            localStorage.removeItem("kanata_stittsville_edit_key");
             if (syncCodeInput) {
               syncCodeInput.value = cleanUrlBinId;
             }
@@ -717,7 +708,6 @@ document.addEventListener("DOMContentLoaded", () => {
     syncCodeInput.addEventListener("input", (e) => {
       const code = e.target.value.trim();
       localStorage.setItem("kanata_stittsville_sync_code", code);
-      localStorage.removeItem("kanata_stittsville_edit_key");
       updateUrlQueryParam(code);
       if (code) {
         updateSyncStatus("ID updated. Click 'Pull' to load.");
@@ -754,7 +744,6 @@ document.addEventListener("DOMContentLoaded", () => {
     clearCodeBtn.addEventListener("click", () => {
       if (confirm("Are you sure you want to disconnect from this cloud checklist? This will clear the Sync ID and URL link, but keeps your local progress.")) {
         localStorage.removeItem("kanata_stittsville_sync_code");
-        localStorage.removeItem("kanata_stittsville_edit_key");
         if (syncCodeInput) {
           syncCodeInput.value = "";
         }
