@@ -191,16 +191,19 @@
             </div>
             <div>
               <h2 class="section-title">Multi-Device Sync</h2>
-              <p class="section-subtitle">Sync checklist via secret code</p>
+              <p class="section-subtitle">Sync checklist across devices</p>
             </div>
           </div>
 
           <div class="form-group" style="margin-top: 1rem;">
-            <label for="sync-code-input" style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em;">Secret Sync Code</label>
+            <label for="sync-code-input" style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em;">Sync Bin ID</label>
             <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
-              <input type="text" id="sync-code-input" placeholder="e.g., udit-sarah-stittsville" class="custom-select" style="text-align: center; font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em;">
-              <button id="generate-code-btn" class="action-btn" title="Generate Random Code" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
-                <i data-lucide="shuffle"></i>
+              <input type="text" id="sync-code-input" placeholder="e.g., tmQmQ9daaM" class="custom-select" style="text-align: center; font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em;">
+              <button id="copy-link-btn" class="action-btn" title="Copy Shareable Link" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
+                <i data-lucide="copy"></i>
+              </button>
+              <button id="clear-code-btn" class="action-btn" title="Clear Sync ID" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
+                <i data-lucide="trash-2"></i>
               </button>
             </div>
           </div>

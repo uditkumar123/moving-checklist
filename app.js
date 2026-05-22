@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Cloud Sync DOM Selectors
   const syncCodeInput = document.getElementById("sync-code-input");
-  const generateCodeBtn = document.getElementById("generate-code-btn");
+  const copyLinkBtn = document.getElementById("copy-link-btn");
+  const clearCodeBtn = document.getElementById("clear-code-btn");
   const cloudPushBtn = document.getElementById("cloud-push-btn");
   const cloudPullBtn = document.getElementById("cloud-pull-btn");
   const syncStatusText = document.getElementById("sync-status");
@@ -511,8 +512,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- CLOUD SYNC LOGIC ---
-  const CLOUD_URL_BASE = "https://kvdb.io/K4tS_moving_sync_7e8b9/";
-
   const updateSyncStatus = (message, type = "normal") => {
     if (!syncStatusText) return;
     syncStatusText.textContent = message;
@@ -528,108 +527,223 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const updateUrlQueryParam = (binId) => {
+    const url = new URL(window.location.href);
+    if (binId) {
+      url.searchParams.set("id", binId);
+    } else {
+      url.searchParams.delete("id");
+    }
+    window.history.replaceState({}, "", url.toString());
+  };
+
+  const pullFromCloud = async (binId, showAlert = true) => {
+    if (!binId) return false;
+
+    if (cloudPushBtn) cloudPushBtn.disabled = true;
+    if (cloudPullBtn) cloudPullBtn.disabled = true;
+
+    try {
+      const response = await fetch(`https://jsonbin-zeta.vercel.app/api/bins/${binId}`);
+      
+      if (response.status === 404) {
+        updateSyncStatus("No cloud data found.", "error");
+        if (showAlert) {
+          alert("No data was found for this Bin ID. Push first from your other device!");
+        }
+        return false;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed response code: " + response.status);
+      }
+
+      const responseData = await response.json();
+      // jsonbin-zeta GET returns the data payload directly, but we support potential wrappers too
+      const cloudData = (responseData && responseData.data !== undefined) ? responseData.data : responseData;
+
+      if (cloudData && cloudData.tasks && Array.isArray(cloudData.tasks)) {
+        tasks = cloudData.tasks;
+        if (cloudData.handoverDeal) {
+          handoverDeal = cloudData.handoverDeal;
+        }
+
+        saveToLocalStorage();
+        loadData();
+        renderChecklist();
+        updateSyncStatus("Synced from cloud!", "success");
+        if (showAlert) {
+          alert("Checklist successfully synced from cloud!");
+        }
+        return true;
+      } else {
+        updateSyncStatus("Invalid cloud data format.", "error");
+        return false;
+      }
+    } catch (err) {
+      console.error("Cloud pull failed:", err);
+      updateSyncStatus("Pull failed. Check network.", "error");
+      return false;
+    } finally {
+      if (cloudPushBtn) cloudPushBtn.disabled = false;
+      if (cloudPullBtn) cloudPullBtn.disabled = false;
+    }
+  };
+
+  const pushToCloud = async () => {
+    let binId = syncCodeInput ? syncCodeInput.value.trim() : "";
+    
+    updateSyncStatus("Pushing to cloud...");
+    if (cloudPushBtn) cloudPushBtn.disabled = true;
+    if (cloudPullBtn) cloudPullBtn.disabled = true;
+
+    try {
+      let url = "https://jsonbin-zeta.vercel.app/api/bins";
+      let method = "POST";
+
+      if (binId) {
+        url = `https://jsonbin-zeta.vercel.app/api/bins/${binId}`;
+        method = "PUT";
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tasks, handoverDeal })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed response: " + response.status);
+      }
+
+      const responseData = await response.json();
+      
+      if (method === "POST" && responseData && responseData.id) {
+        binId = responseData.id;
+        localStorage.setItem("kanata_stittsville_sync_code", binId);
+        if (syncCodeInput) {
+          syncCodeInput.value = binId;
+        }
+        updateUrlQueryParam(binId);
+        updateSyncStatus("Created cloud bin!", "success");
+        alert(`New cloud sync checklist created!\nYour Bin ID is: ${binId}\nShareable link added to address bar.`);
+      } else {
+        updateSyncStatus("Cloud sync complete!", "success");
+      }
+      return true;
+    } catch (err) {
+      console.error("Cloud push failed:", err);
+      updateSyncStatus("Sync failed. Check network.", "error");
+      return false;
+    } finally {
+      if (cloudPushBtn) cloudPushBtn.disabled = false;
+      if (cloudPullBtn) cloudPullBtn.disabled = false;
+    }
+  };
+
+  const handleUrlSync = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlBinId = urlParams.get("id");
+    const localBinId = localStorage.getItem("kanata_stittsville_sync_code") || "";
+
+    if (urlBinId) {
+      const cleanUrlBinId = urlBinId.trim();
+      
+      if (cleanUrlBinId !== localBinId) {
+        const hasExistingProgress = tasks.some(t => t.completed) || Object.values(handoverDeal).some(v => v);
+        
+        let confirmLoad = true;
+        if (hasExistingProgress) {
+          confirmLoad = confirm("We found a shared checklist in the link. Do you want to load it and overwrite your local progress?");
+        }
+        
+        if (confirmLoad) {
+          updateSyncStatus("Loading shared checklist...");
+          const success = await pullFromCloud(cleanUrlBinId, false);
+          if (success) {
+            localStorage.setItem("kanata_stittsville_sync_code", cleanUrlBinId);
+            if (syncCodeInput) {
+              syncCodeInput.value = cleanUrlBinId;
+            }
+            updateSyncStatus("Shared checklist loaded!", "success");
+          } else {
+            updateSyncStatus("Failed to load shared checklist.", "error");
+          }
+        } else {
+          updateUrlQueryParam(localBinId);
+        }
+      } else {
+        updateSyncStatus("Checking cloud updates...");
+        await pullFromCloud(cleanUrlBinId, false);
+      }
+    } else if (localBinId) {
+      updateUrlQueryParam(localBinId);
+    }
+  };
+
   if (syncCodeInput) {
     syncCodeInput.addEventListener("input", (e) => {
-      const code = e.target.value.trim().toLowerCase();
+      const code = e.target.value.trim();
       localStorage.setItem("kanata_stittsville_sync_code", code);
-      updateSyncStatus("Secret code saved locally.");
+      updateUrlQueryParam(code);
+      if (code) {
+        updateSyncStatus("ID updated. Click 'Pull' to load.");
+      } else {
+        updateSyncStatus("Disconnected from cloud sync.");
+      }
     });
   }
 
-  if (generateCodeBtn) {
-    generateCodeBtn.addEventListener("click", () => {
-      const randomCode = `move-${Math.random().toString(36).substring(2, 8)}`;
-      if (syncCodeInput) {
-        syncCodeInput.value = randomCode;
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener("click", () => {
+      const binId = syncCodeInput ? syncCodeInput.value.trim() : "";
+      if (!binId) {
+        alert("No sync ID found! Please 'Push' your checklist first to generate one.");
+        return;
       }
-      localStorage.setItem("kanata_stittsville_sync_code", randomCode);
-      updateSyncStatus("New code generated!");
+      
+      const shareUrl = new URL(window.location.href);
+      shareUrl.searchParams.set("id", binId);
+      
+      navigator.clipboard.writeText(shareUrl.toString()).then(() => {
+        updateSyncStatus("Link copied to clipboard!", "success");
+        setTimeout(() => {
+          updateSyncStatus(syncCodeInput.value.trim() ? "Connected to cloud sync." : "Not connected to cloud sync.");
+        }, 3000);
+      }).catch(err => {
+        console.error("Clipboard copy failed:", err);
+        alert(`Shareable Link:\n${shareUrl.toString()}`);
+      });
+    });
+  }
+
+  if (clearCodeBtn) {
+    clearCodeBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you want to disconnect from this cloud checklist? This will clear the Sync ID and URL link, but keeps your local progress.")) {
+        localStorage.removeItem("kanata_stittsville_sync_code");
+        if (syncCodeInput) {
+          syncCodeInput.value = "";
+        }
+        updateUrlQueryParam("");
+        updateSyncStatus("Disconnected from cloud sync.");
+      }
     });
   }
 
   if (cloudPushBtn) {
-    cloudPushBtn.addEventListener("click", async () => {
-      const code = syncCodeInput ? syncCodeInput.value.trim().toLowerCase() : "";
-      if (!code) {
-        alert("Please enter or generate a Secret Sync Code first!");
-        return;
-      }
-
-      updateSyncStatus("Pushing to cloud...");
-      if (cloudPushBtn) cloudPushBtn.disabled = true;
-      if (cloudPullBtn) cloudPullBtn.disabled = true;
-
-      try {
-        const response = await fetch(CLOUD_URL_BASE + code, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ tasks, handoverDeal })
-        });
-
-        if (response.ok) {
-          updateSyncStatus("Cloud sync complete!", "success");
-        } else {
-          throw new Error("Failed response code");
-        }
-      } catch (err) {
-        console.error("Cloud push failed:", err);
-        updateSyncStatus("Sync failed. Check network.", "error");
-      } finally {
-        if (cloudPushBtn) cloudPushBtn.disabled = false;
-        if (cloudPullBtn) cloudPullBtn.disabled = false;
-      }
-    });
+    cloudPushBtn.addEventListener("click", pushToCloud);
   }
 
   if (cloudPullBtn) {
-    cloudPullBtn.addEventListener("click", async () => {
-      const code = syncCodeInput ? syncCodeInput.value.trim().toLowerCase() : "";
+    cloudPullBtn.addEventListener("click", () => {
+      const code = syncCodeInput ? syncCodeInput.value.trim() : "";
       if (!code) {
-        alert("Please enter or generate a Secret Sync Code first!");
+        alert("Please enter a Sync Bin ID first!");
         return;
       }
-
-      updateSyncStatus("Pulling from cloud...");
-      if (cloudPushBtn) cloudPushBtn.disabled = true;
-      if (cloudPullBtn) cloudPullBtn.disabled = true;
-
-      try {
-        const response = await fetch(CLOUD_URL_BASE + code);
-        
-        if (response.status === 404) {
-          updateSyncStatus("No data found for this code.", "error");
-          alert("No data was found under this Sync Code. Push first from your other device!");
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("Failed response code");
-        }
-
-        const data = await response.json();
-        if (data && data.tasks && Array.isArray(data.tasks)) {
-          tasks = data.tasks;
-          if (data.handoverDeal) {
-            handoverDeal = data.handoverDeal;
-          }
-
-          saveToLocalStorage();
-          loadData();
-          renderChecklist();
-          updateSyncStatus("Checklist updated!", "success");
-          alert("Checklist successfully synced from cloud!");
-        } else {
-          updateSyncStatus("Invalid cloud data format.", "error");
-        }
-      } catch (err) {
-        console.error("Cloud pull failed:", err);
-        updateSyncStatus("Pull failed. Check network.", "error");
-      } finally {
-        if (cloudPushBtn) cloudPushBtn.disabled = false;
-        if (cloudPullBtn) cloudPullBtn.disabled = false;
-      }
+      pullFromCloud(code, true);
     });
   }
 
@@ -638,4 +752,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initDateDisplay();
   loadData();
   renderChecklist();
+  handleUrlSync();
 });
