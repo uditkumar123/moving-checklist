@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://jsonbin-zeta.vercel.app/api/bins/${binId}`);
+      const response = await fetch(`https://jsonhosting.com/api/json/${binId}`);
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -559,8 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const responseData = await response.json();
-      // jsonbin-zeta GET returns the data payload directly, but we support potential wrappers too
-      const cloudData = (responseData && responseData.data !== undefined) ? responseData.data : responseData;
+      const cloudData = responseData;
 
       if (cloudData && cloudData.tasks && Array.isArray(cloudData.tasks)) {
         tasks = cloudData.tasks;
@@ -592,29 +591,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pushToCloud = async () => {
     let binId = syncCodeInput ? syncCodeInput.value.trim() : "";
+    let editKey = localStorage.getItem("kanata_stittsville_edit_key") || "";
     
     updateSyncStatus("Pushing to cloud...");
     if (cloudPushBtn) cloudPushBtn.disabled = true;
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      let url = "https://jsonbin-zeta.vercel.app/api/bins";
+      let url = "https://jsonhosting.com/api/json";
       let method = "POST";
+      let headers = {
+        "Content-Type": "application/json"
+      };
 
-      if (binId) {
-        url = `https://jsonbin-zeta.vercel.app/api/bins/${binId}`;
-        method = "PUT";
+      if (binId && editKey) {
+        url = `https://jsonhosting.com/api/json/${binId}`;
+        method = "PATCH";
+        headers["X-Edit-Key"] = editKey;
+      } else if (binId && !editKey) {
+        const confirmNewBin = confirm(
+          "You are viewing a shared checklist but do not have permission to edit it directly.\n\n" +
+          "Would you like to create your own editable copy of this checklist?"
+        );
+        if (!confirmNewBin) {
+          updateSyncStatus("Push cancelled (read-only).");
+          return false;
+        }
+        binId = "";
       }
 
       const response = await fetch(url, {
         method: method,
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: headers,
         body: JSON.stringify({ tasks, handoverDeal })
       });
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403 || response.status === 404) {
+          console.warn(`Sync failed (${response.status}). Creating a new bin as fallback.`);
+          const retryConfirm = confirm(
+            "We couldn't update this cloud bin (it may have expired or is owned by another device).\n\n" +
+            "Would you like to create a new cloud checklist bin instead?"
+          );
+          if (retryConfirm) {
+            localStorage.removeItem("kanata_stittsville_sync_code");
+            localStorage.removeItem("kanata_stittsville_edit_key");
+            if (syncCodeInput) syncCodeInput.value = "";
+            return await pushToCloud();
+          } else {
+            throw new Error(`Unauthorized or expired: ${response.status}`);
+          }
+        }
         throw new Error("Failed response: " + response.status);
       }
 
@@ -622,7 +649,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
       if (method === "POST" && responseData && responseData.id) {
         binId = responseData.id;
+        editKey = responseData.editKey || "";
         localStorage.setItem("kanata_stittsville_sync_code", binId);
+        localStorage.setItem("kanata_stittsville_edit_key", editKey);
         if (syncCodeInput) {
           syncCodeInput.value = binId;
         }
@@ -664,6 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const success = await pullFromCloud(cleanUrlBinId, false);
           if (success) {
             localStorage.setItem("kanata_stittsville_sync_code", cleanUrlBinId);
+            localStorage.removeItem("kanata_stittsville_edit_key");
             if (syncCodeInput) {
               syncCodeInput.value = cleanUrlBinId;
             }
@@ -687,6 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
     syncCodeInput.addEventListener("input", (e) => {
       const code = e.target.value.trim();
       localStorage.setItem("kanata_stittsville_sync_code", code);
+      localStorage.removeItem("kanata_stittsville_edit_key");
       updateUrlQueryParam(code);
       if (code) {
         updateSyncStatus("ID updated. Click 'Pull' to load.");
@@ -723,6 +754,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearCodeBtn.addEventListener("click", () => {
       if (confirm("Are you sure you want to disconnect from this cloud checklist? This will clear the Sync ID and URL link, but keeps your local progress.")) {
         localStorage.removeItem("kanata_stittsville_sync_code");
+        localStorage.removeItem("kanata_stittsville_edit_key");
         if (syncCodeInput) {
           syncCodeInput.value = "";
         }
