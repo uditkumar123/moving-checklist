@@ -43,6 +43,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const dealCheckboxes = document.querySelectorAll(".deal-check");
   const dealStamp = document.getElementById("handover-deal-stamp");
 
+  // Cloud Sync DOM Selectors
+  const syncCodeInput = document.getElementById("sync-code-input");
+  const generateCodeBtn = document.getElementById("generate-code-btn");
+  const cloudPushBtn = document.getElementById("cloud-push-btn");
+  const cloudPullBtn = document.getElementById("cloud-pull-btn");
+  const syncStatusText = document.getElementById("sync-status");
+
   // --- THEME INITIALIZATION ---
   const initTheme = () => {
     const savedTheme = localStorage.getItem("theme") || "dark";
@@ -133,6 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
         checkbox.checked = handoverDeal[id];
       }
     });
+
+    // Load sync code
+    const savedSyncCode = localStorage.getItem("kanata_stittsville_sync_code");
+    if (savedSyncCode && syncCodeInput) {
+      syncCodeInput.value = savedSyncCode;
+    }
 
     updateStats();
     updateHandoverDealStamp();
@@ -496,6 +509,129 @@ document.addEventListener("DOMContentLoaded", () => {
       renderChecklist();
     }
   });
+
+  // --- CLOUD SYNC LOGIC ---
+  const CLOUD_URL_BASE = "https://kvdb.io/K4tS_moving_sync_7e8b9/";
+
+  const updateSyncStatus = (message, type = "normal") => {
+    if (!syncStatusText) return;
+    syncStatusText.textContent = message;
+    if (type === "success") {
+      syncStatusText.style.color = "var(--success)";
+      syncStatusText.style.borderColor = "rgba(16, 185, 129, 0.2)";
+    } else if (type === "error") {
+      syncStatusText.style.color = "var(--danger)";
+      syncStatusText.style.borderColor = "rgba(244, 63, 94, 0.2)";
+    } else {
+      syncStatusText.style.color = "var(--text-secondary)";
+      syncStatusText.style.borderColor = "var(--input-border)";
+    }
+  };
+
+  if (syncCodeInput) {
+    syncCodeInput.addEventListener("input", (e) => {
+      const code = e.target.value.trim().toLowerCase();
+      localStorage.setItem("kanata_stittsville_sync_code", code);
+      updateSyncStatus("Secret code saved locally.");
+    });
+  }
+
+  if (generateCodeBtn) {
+    generateCodeBtn.addEventListener("click", () => {
+      const randomCode = `move-${Math.random().toString(36).substring(2, 8)}`;
+      if (syncCodeInput) {
+        syncCodeInput.value = randomCode;
+      }
+      localStorage.setItem("kanata_stittsville_sync_code", randomCode);
+      updateSyncStatus("New code generated!");
+    });
+  }
+
+  if (cloudPushBtn) {
+    cloudPushBtn.addEventListener("click", async () => {
+      const code = syncCodeInput ? syncCodeInput.value.trim().toLowerCase() : "";
+      if (!code) {
+        alert("Please enter or generate a Secret Sync Code first!");
+        return;
+      }
+
+      updateSyncStatus("Pushing to cloud...");
+      if (cloudPushBtn) cloudPushBtn.disabled = true;
+      if (cloudPullBtn) cloudPullBtn.disabled = true;
+
+      try {
+        const response = await fetch(CLOUD_URL_BASE + code, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ tasks, handoverDeal })
+        });
+
+        if (response.ok) {
+          updateSyncStatus("Cloud sync complete!", "success");
+        } else {
+          throw new Error("Failed response code");
+        }
+      } catch (err) {
+        console.error("Cloud push failed:", err);
+        updateSyncStatus("Sync failed. Check network.", "error");
+      } finally {
+        if (cloudPushBtn) cloudPushBtn.disabled = false;
+        if (cloudPullBtn) cloudPullBtn.disabled = false;
+      }
+    });
+  }
+
+  if (cloudPullBtn) {
+    cloudPullBtn.addEventListener("click", async () => {
+      const code = syncCodeInput ? syncCodeInput.value.trim().toLowerCase() : "";
+      if (!code) {
+        alert("Please enter or generate a Secret Sync Code first!");
+        return;
+      }
+
+      updateSyncStatus("Pulling from cloud...");
+      if (cloudPushBtn) cloudPushBtn.disabled = true;
+      if (cloudPullBtn) cloudPullBtn.disabled = true;
+
+      try {
+        const response = await fetch(CLOUD_URL_BASE + code);
+        
+        if (response.status === 404) {
+          updateSyncStatus("No data found for this code.", "error");
+          alert("No data was found under this Sync Code. Push first from your other device!");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Failed response code");
+        }
+
+        const data = await response.json();
+        if (data && data.tasks && Array.isArray(data.tasks)) {
+          tasks = data.tasks;
+          if (data.handoverDeal) {
+            handoverDeal = data.handoverDeal;
+          }
+
+          saveToLocalStorage();
+          loadData();
+          renderChecklist();
+          updateSyncStatus("Checklist updated!", "success");
+          alert("Checklist successfully synced from cloud!");
+        } else {
+          updateSyncStatus("Invalid cloud data format.", "error");
+        }
+      } catch (err) {
+        console.error("Cloud pull failed:", err);
+        updateSyncStatus("Pull failed. Check network.", "error");
+      } finally {
+        if (cloudPushBtn) cloudPushBtn.disabled = false;
+        if (cloudPullBtn) cloudPullBtn.disabled = false;
+      }
+    });
+  }
 
   // --- INITIAL RUN ---
   initTheme();

@@ -182,6 +182,42 @@
             </div>
           </div>
         </div>
+
+        <!-- Cloud Sync Card -->
+        <div class="glass-card cloud-sync-card" style="margin-top: 1.5rem;">
+          <div class="handover-header">
+            <div class="handover-icon-wrapper" style="background-color: rgba(6, 182, 212, 0.1); color: var(--accent);">
+              <i data-lucide="cloud-lightning"></i>
+            </div>
+            <div>
+              <h2 class="section-title">Multi-Device Sync</h2>
+              <p class="section-subtitle">Sync checklist via secret code</p>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="sync-code-input" style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em;">Secret Sync Code</label>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
+              <input type="text" id="sync-code-input" placeholder="e.g., udit-sarah-stittsville" class="custom-select" style="text-align: center; font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em;">
+              <button id="generate-code-btn" class="action-btn" title="Generate Random Code" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
+                <i data-lucide="shuffle"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="sync-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem; padding: 0.4rem 0.65rem; border-radius: 6px; background-color: var(--badge-bg); border: 1px solid var(--input-border); text-align: center; font-weight: 500;">
+            Not connected to cloud sync.
+          </div>
+
+          <div style="margin-top: 1rem; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <button id="cloud-push-btn" class="secondary-btn" style="width: 100%; text-align: center; justify-content: center; padding: 0.5rem 0.35rem; font-size: 0.85rem;">
+              <i data-lucide="cloud-upload" style="width: 14px; height: 14px;"></i> Push
+            </button>
+            <button id="cloud-pull-btn" class="secondary-btn" style="width: 100%; text-align: center; justify-content: center; padding: 0.5rem 0.35rem; font-size: 0.85rem;">
+              <i data-lucide="cloud-download" style="width: 14px; height: 14px;"></i> Pull
+            </button>
+          </div>
+        </div>
       </section>
 
       <!-- Checklist Section -->
