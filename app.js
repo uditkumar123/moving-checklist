@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://jsonblob.com/api/jsonBlob/${binId}`);
+      const response = await fetch(`https://api.restful-api.dev/objects/${binId}`);
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -558,8 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Failed response code: " + response.status);
       }
 
-      const text = await response.text();
-      const cloudData = JSON.parse(text);
+      const responseJson = await response.json();
+      const cloudData = responseJson.data;
 
       if (cloudData && cloudData.tasks && Array.isArray(cloudData.tasks)) {
         tasks = cloudData.tasks;
@@ -597,10 +597,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const payload = JSON.stringify({ tasks, handoverDeal });
+      const payload = JSON.stringify({ 
+        name: "Kanata to Stittsville Sync",
+        data: { tasks, handoverDeal } 
+      });
 
       if (!binId) {
-        const response = await fetch("https://jsonblob.com/api/jsonBlob", {
+        const response = await fetch("https://api.restful-api.dev/objects", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -613,13 +616,8 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error("Failed to create cloud sync bucket: " + response.status);
         }
 
-        const locationHeader = response.headers.get("Location");
-        if (locationHeader) {
-           const parts = locationHeader.split("/");
-           binId = parts[parts.length - 1];
-        } else {
-           throw new Error("No Location header returned from jsonblob");
-        }
+        const responseJson = await response.json();
+        binId = responseJson.id;
         
         localStorage.setItem("kanata_stittsville_sync_code", binId);
         if (syncCodeInput) {
@@ -627,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateUrlQueryParam(binId);
       } else {
-        const putResponse = await fetch(`https://jsonblob.com/api/jsonBlob/${binId}`, {
+        const putResponse = await fetch(`https://api.restful-api.dev/objects/${binId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
