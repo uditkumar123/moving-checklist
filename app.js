@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://api.restful-api.dev/objects/${binId}`);
+      const response = await fetch(`https://extendsclass.com/api/json-storage/bin/${binId}`);
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -558,8 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Failed response code: " + response.status);
       }
 
-      const responseJson = await response.json();
-      const cloudData = responseJson.data;
+      const cloudData = await response.json();
 
       if (cloudData && cloudData.tasks && Array.isArray(cloudData.tasks)) {
         tasks = cloudData.tasks;
@@ -597,13 +596,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (cloudPullBtn) cloudPullBtn.disabled = true;
 
     try {
-      const payload = JSON.stringify({ 
-        name: "Kanata to Stittsville Sync",
-        data: { tasks, handoverDeal } 
-      });
+      const payload = JSON.stringify({ tasks, handoverDeal });
 
       if (!binId) {
-        const response = await fetch("https://api.restful-api.dev/objects", {
+        const response = await fetch("https://extendsclass.com/api/json-storage/bin", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -625,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         updateUrlQueryParam(binId);
       } else {
-        const putResponse = await fetch(`https://api.restful-api.dev/objects/${binId}`, {
+        const putResponse = await fetch(`https://extendsclass.com/api/json-storage/bin/${binId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
