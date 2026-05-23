@@ -913,7 +913,10 @@ body {
 }
 
 .badge-ottawa::before {
-  content: '🇨🇦';
+  content: 'CA';
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 /* Edit & Delete Action Buttons */

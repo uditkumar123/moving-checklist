@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: Node.js is required to syntax-check JavaScript files." >&2
+  exit 1
+fi
+
+node --check app.js
+node --check checklistData.js

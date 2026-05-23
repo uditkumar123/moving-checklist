@@ -81,8 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dateText = document.getElementById("date-text");
     const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
     
-    // We mock/reference the user's local time: 2026-05-22
-    const currentDate = new Date("2026-05-22T11:55:00-04:00");
+    const currentDate = new Date();
     dateText.textContent = currentDate.toLocaleDateString('en-CA', options);
     
     // Calculate countdown from May 22, 2026 to June 15, 2026
