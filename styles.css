@@ -1251,7 +1251,75 @@ body {
   max-width: 280px;
 }
 
+/* Cloud Sync Card */
+.cloud-sync-card {
+  margin-top: 1.5rem;
+}
+
+.sync-icon-wrapper {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: var(--accent);
+}
+
+.sync-form-group {
+  margin-top: 1rem;
+}
+
+.sync-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.sync-code-field {
+  text-align: center;
+  font-family: monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+
+.sync-action-btn {
+  height: 38px;
+  width: 38px;
+  flex-shrink: 0;
+}
+
+.sync-status-bar {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.85rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  background-color: var(--badge-bg);
+  border: 1px solid var(--input-border);
+  text-align: center;
+  font-weight: 500;
+}
+
+.sync-btn-grid {
+  margin-top: 1rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.sync-push-pull-btn {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  padding: 0.5rem 0.35rem;
+  font-size: 0.85rem;
+}
+
+.sync-btn-icon {
+  width: 14px;
+  height: 14px;
+}
+
 /* Responsive Media Queries */
+
+/* ==================== Tablet (≤ 1024px) ==================== */
 @media (max-width: 1024px) {
   .app-content {
     grid-template-columns: 1fr;
@@ -1261,12 +1329,21 @@ body {
   .handover-card {
     position: static;
   }
+
+  /* Re-order so checklist section comes first on single-column */
+  .handover-dashboard-section {
+    order: 2;
+  }
+  .checklist-section {
+    order: 1;
+  }
 }
 
-@media (max-width: 640px) {
+/* ==================== Phone (≤ 768px) ==================== */
+@media (max-width: 768px) {
   .app-container {
-    padding: 1.5rem 1rem;
-    gap: 1.75rem;
+    padding: 1.75rem 1rem;
+    gap: 2rem;
   }
 
   .header-main {
@@ -1274,7 +1351,7 @@ body {
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: space-between;
@@ -1283,34 +1360,503 @@ body {
   .app-title {
     font-size: 1.85rem;
   }
-  
+
+  .app-subtitle {
+    font-size: 0.85rem;
+  }
+
   .stats-card {
     padding: 1.25rem;
+    border-radius: 16px;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
-  
+
   #countdown-box {
     grid-column: span 2;
   }
-  
+
+  .stat-value {
+    font-size: 1.65rem;
+  }
+
+  /* Glass card padding reduction */
+  .glass-card {
+    padding: 1.35rem;
+    border-radius: 16px;
+  }
+
+  /* Handover info grid — 2-col still works at this size */
+  .handover-info-grid {
+    gap: 1rem;
+  }
+
+  /* Filter buttons — enable smooth horizontal scroll */
+  .filter-buttons {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    padding-bottom: 0.25rem;
+  }
+
+  .filter-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  /* Sub-filter selects — stack on narrower tablets */
+  .sub-filter-row {
+    gap: 1rem;
+  }
+
+  .sub-filter-group {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  /* Task items — tighter on mobile */
+  .task-item {
+    padding: 1rem;
+    gap: 0.75rem;
+    border-radius: 12px;
+  }
+
+  .task-title {
+    font-size: 0.95rem;
+  }
+
+  .task-desc {
+    font-size: 0.8rem;
+  }
+
+  /* Always show action buttons on touch */
+  .task-actions {
+    opacity: 1;
+  }
+
+  /* Form grid — single column */
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .span-2 {
     grid-column: span 1;
   }
-  
+
   .checkbox-row {
     flex-direction: column;
     gap: 0.75rem;
   }
 
+  /* Data controls panel buttons — stack */
+  .data-btn-row {
+    flex-direction: column;
+  }
+
+  .secondary-btn, .danger-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Cloud sync card overrides for inline styles */
+  .cloud-sync-card {
+    margin-top: 1.25rem !important;
+  }
+
+  /* Section title sizing */
+  .section-title {
+    font-size: 1.15rem;
+  }
+
+  /* Add task title */
+  .add-task-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Footer */
+  .app-footer-note {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+}
+
+/* ==================== Small Phone (≤ 480px) ==================== */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 1.25rem 0.75rem;
+    gap: 1.5rem;
+  }
+
+  /* Logo & header */
+  .logo-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 12px;
+  }
+
+  .logo-icon i {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .app-title {
+    font-size: 1.5rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .current-date-badge {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  .theme-toggle-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  /* Stats card */
+  .stats-card {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .stat-value {
+    font-size: 1.45rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+  }
+
+  /* Glass cards */
+  .glass-card {
+    padding: 1.15rem;
+    border-radius: 14px;
+  }
+
+  /* Handover info grid — stack to single column on small phones */
+  .handover-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .info-value {
+    font-size: 0.8rem;
+  }
+
+  /* Handover checklists — tighter spacing */
+  .handover-checklist {
+    gap: 0.55rem;
+  }
+
+  .handover-check-item {
+    font-size: 0.8rem;
+    gap: 0.6rem;
+  }
+
+  .check-label-group {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .deal-amount {
+    font-size: 0.8rem;
+  }
+
+  /* Block titles */
+  .block-title {
+    font-size: 0.78rem;
+  }
+
+  /* Handover stamp */
+  .deal-stamp {
+    font-size: 0.82rem;
+    padding: 0.55rem 1.25rem;
+  }
+
+  /* Search input */
+  #task-search {
+    padding: 0.75rem 0.85rem 0.75rem 2.5rem;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+
+  .search-icon {
+    left: 0.85rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Filter group label */
+  .filter-group-label {
+    font-size: 0.72rem;
+  }
+
+  /* Filter buttons — smaller touch targets with enough padding */
+  .filter-btn {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
+
+  /* Sub-filter selects */
+  .sub-filter-row {
+    padding-top: 1rem;
+    gap: 0.85rem;
+  }
+
+  .custom-select {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  /* Task items */
+  .task-item {
+    padding: 0.85rem;
+    gap: 0.65rem;
+    border-radius: 10px;
+  }
+
+  .task-title-row {
+    gap: 0.5rem;
+  }
+
+  .task-title {
+    font-size: 0.88rem;
+  }
+
+  .task-desc {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .task-badges {
+    gap: 0.35rem;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+  }
+
+  /* Task checkbox — slightly smaller */
+  .task-checkbox {
+    height: 20px;
+    width: 20px;
+  }
+
+  .task-checkbox::after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+  }
+
+  /* Action buttons — always visible, bigger touch area */
   .task-actions {
-    opacity: 1; /* Always show buttons on mobile */
+    opacity: 1;
+    gap: 0.25rem;
+  }
+
+  .action-btn {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 6px;
+  }
+
+  /* Add task form */
+  .add-task-title {
+    font-size: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .form-group label {
+    font-size: 0.72rem;
+  }
+
+  .form-group input[type="text"] {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .submit-task-btn {
+    padding: 0.75rem;
+    font-size: 0.88rem;
+    border-radius: 8px;
+  }
+
+  /* Data controls panel */
+  .panel-header h4 {
+    font-size: 0.95rem;
+  }
+
+  .panel-header p {
+    font-size: 0.75rem;
+  }
+
+  .secondary-btn, .danger-btn {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 2rem 1rem;
+    border-radius: 12px;
+  }
+
+  .empty-state-title {
+    font-size: 1rem;
+  }
+
+  .empty-state-desc {
+    font-size: 0.8rem;
+  }
+
+  /* Footer */
+  .app-footer-note {
+    font-size: 0.72rem;
+  }
+
+  .tech-stack-info {
+    font-size: 0.68rem;
+  }
+}
+
+/* ==================== Very Small Phone (≤ 360px) ==================== */
+@media (max-width: 360px) {
+  .app-container {
+    padding: 1rem 0.5rem;
+    gap: 1.25rem;
+  }
+
+  .app-title {
+    font-size: 1.3rem;
+  }
+
+  .logo-area {
+    gap: 0.65rem;
+  }
+
+  .logo-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+  }
+
+  .logo-icon i {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .glass-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .handover-header {
+    gap: 0.65rem;
+    padding-bottom: 1rem;
+  }
+
+  .handover-icon-wrapper {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 8px;
+  }
+
+  .handover-icon-wrapper i {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 1.05rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.72rem;
+  }
+
+  /* Filter buttons wrap to 2-line scrollable */
+  .filter-btn {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.7rem;
+  }
+
+  .task-item {
+    padding: 0.75rem;
+  }
+
+  .task-title {
+    font-size: 0.82rem;
+  }
+
+  .task-desc {
+    font-size: 0.72rem;
+  }
+
+  .badge {
+    font-size: 0.6rem;
+    padding: 0.12rem 0.35rem;
+  }
+}
+
+/* ==================== Touch Device Enhancements ==================== */
+@media (hover: none) and (pointer: coarse) {
+  /* Always visible action buttons on touch devices */
+  .task-actions {
+    opacity: 1;
+  }
+
+  /* Bigger touch targets for checkboxes */
+  .task-checkbox-wrapper {
+    padding: 4px;
+    margin: -4px;
+  }
+
+  .handover-check-item {
+    padding: 4px 0;
+  }
+
+  /* Minimum touch targets for buttons */
+  .action-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .filter-btn {
+    min-height: 36px;
+  }
+
+  .theme-toggle-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Disable hover animations that don't apply to touch */
+  .task-item:hover {
+    transform: none;
   }
 }

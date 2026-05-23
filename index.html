@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="An interactive, premium moving checklist for transitioning from Kanata (239 Tandalee Crescent) to Stittsville. Includes Cash for Keys contract tracker, utility setups, and local Ottawa checklists.">
+  
+  <!-- Cache Control -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <title>Kanata to Stittsville Moving Tracker & Handover Checklist</title>
   
   <!-- Fonts -->
@@ -11,11 +17,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Lucide Icons CDN -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Icons CDN (pinned version) -->
+  <script src="https://unpkg.com/lucide@0.460.0"></script>
   
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- Stylesheet (cache-busted) -->
+  <link rel="stylesheet" href="styles.css?v=1.1.0">
 </head>
 <body>
   <!-- Background Accents -->
@@ -184,9 +190,9 @@
         </div>
 
         <!-- Cloud Sync Card -->
-        <div class="glass-card cloud-sync-card" style="margin-top: 1.5rem;">
+        <div class="glass-card cloud-sync-card">
           <div class="handover-header">
-            <div class="handover-icon-wrapper" style="background-color: rgba(6, 182, 212, 0.1); color: var(--accent);">
+            <div class="handover-icon-wrapper sync-icon-wrapper">
               <i data-lucide="cloud-lightning"></i>
             </div>
             <div>
@@ -195,29 +201,29 @@
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 1rem;">
-            <label for="sync-code-input" style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.02em;">Sync Bin ID</label>
-            <div style="display: flex; gap: 0.5rem; margin-top: 0.35rem;">
-              <input type="text" id="sync-code-input" placeholder="e.g., tmQmQ9daaM" class="custom-select" style="text-align: center; font-family: monospace; font-size: 0.95rem; letter-spacing: 0.05em;">
-              <button id="copy-link-btn" class="action-btn" title="Copy Shareable Link" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
+          <div class="form-group sync-form-group">
+            <label for="sync-code-input">Sync Bin ID</label>
+            <div class="sync-input-row">
+              <input type="text" id="sync-code-input" placeholder="e.g., tmQmQ9daaM" class="custom-select sync-code-field">
+              <button id="copy-link-btn" class="action-btn sync-action-btn" title="Copy Shareable Link" type="button">
                 <i data-lucide="copy"></i>
               </button>
-              <button id="clear-code-btn" class="action-btn" title="Clear Sync ID" style="height: 38px; width: 38px; flex-shrink: 0;" type="button">
+              <button id="clear-code-btn" class="action-btn sync-action-btn" title="Clear Sync ID" type="button">
                 <i data-lucide="trash-2"></i>
               </button>
             </div>
           </div>
 
-          <div id="sync-status" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.85rem; padding: 0.4rem 0.65rem; border-radius: 6px; background-color: var(--badge-bg); border: 1px solid var(--input-border); text-align: center; font-weight: 500;">
+          <div id="sync-status" class="sync-status-bar">
             Not connected to cloud sync.
           </div>
 
-          <div style="margin-top: 1rem; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-            <button id="cloud-push-btn" class="secondary-btn" style="width: 100%; text-align: center; justify-content: center; padding: 0.5rem 0.35rem; font-size: 0.85rem;">
-              <i data-lucide="cloud-upload" style="width: 14px; height: 14px;"></i> Push
+          <div class="sync-btn-grid">
+            <button id="cloud-push-btn" class="secondary-btn sync-push-pull-btn">
+              <i data-lucide="cloud-upload" class="sync-btn-icon"></i> Push
             </button>
-            <button id="cloud-pull-btn" class="secondary-btn" style="width: 100%; text-align: center; justify-content: center; padding: 0.5rem 0.35rem; font-size: 0.85rem;">
-              <i data-lucide="cloud-download" style="width: 14px; height: 14px;"></i> Pull
+            <button id="cloud-pull-btn" class="secondary-btn sync-push-pull-btn">
+              <i data-lucide="cloud-download" class="sync-btn-icon"></i> Pull
             </button>
           </div>
         </div>
@@ -360,8 +366,8 @@
     </footer>
   </div>
 
-  <!-- Scripts -->
-  <script src="checklistData.js"></script>
-  <script src="app.js"></script>
+  <!-- Scripts (cache-busted) -->
+  <script src="checklistData.js?v=1.1.0"></script>
+  <script src="app.js?v=1.1.0"></script>
 </body>
 </html>

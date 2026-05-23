@@ -545,7 +545,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const KVDB_BUCKET = "HzGzsae6TTWhPz7jgZZkpy";
 
     try {
-      const response = await fetch(`https://kvdb.io/${KVDB_BUCKET}/${binId}`);
+      const response = await fetch(`https://kvdb.io/${KVDB_BUCKET}/${binId}?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
       
       if (response.status === 404) {
         updateSyncStatus("No cloud data found.", "error");
@@ -613,9 +616,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const putResponse = await fetch(`https://kvdb.io/${KVDB_BUCKET}/${binId}`, {
         method: "PUT",
+        cache: 'no-store',
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Accept": "application/json",
+          "Cache-Control": "no-cache"
         },
         body: payload
       });
