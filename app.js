@@ -546,8 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const response = await fetch(`https://kvdb.io/${KVDB_BUCKET}/${binId}?_t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        cache: 'no-store'
       });
       
       if (response.status === 404) {
@@ -594,6 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pushToCloud = async () => {
     let binId = syncCodeInput ? syncCodeInput.value.trim() : "";
+    let isNewBin = false;
     
     updateSyncStatus("Pushing to cloud...");
     if (cloudPushBtn) cloudPushBtn.disabled = true;
@@ -607,6 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!binId) {
         // Generate a random key for this user's checklist
         binId = Math.random().toString(36).substring(2, 10);
+        isNewBin = true;
         localStorage.setItem("kanata_stittsville_sync_code", binId);
         if (syncCodeInput) {
           syncCodeInput.value = binId;
@@ -618,9 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "PUT",
         cache: 'no-store',
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Cache-Control": "no-cache"
+          "Content-Type": "application/json"
         },
         body: payload
       });
@@ -631,8 +630,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       updateSyncStatus("Cloud sync complete!", "success");
       
-      const savedSyncCode = localStorage.getItem("kanata_stittsville_sync_code");
-      if (savedSyncCode !== binId) {
+      if (isNewBin) {
         alert(`New cloud sync checklist created!\nYour Bin ID is: ${binId}\nShareable link added to address bar.`);
       }
       return true;
